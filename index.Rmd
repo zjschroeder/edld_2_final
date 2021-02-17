@@ -118,7 +118,7 @@ Row
 
 ### Figure 1
 
-```{r}
+```{r, fig.width=30, fig.height=21}
 data %>% 
   group_by(country) %>% 
   summarise(.groups = 'keep',
@@ -145,19 +145,14 @@ data %>%
        caption = "OECD Teaching and Learning International Survey (2018)") +
   coord_flip() +
   ggthemes::theme_fivethirtyeight() +
-  theme(text = element_text(size=10),
-        legend.text=element_text(size=12),
-        legend.title = element_text(size = 12),
-        title = element_text(size = 14))
+  theme(text = element_text(size=30),
+        legend.text=element_text(size=36),
+        legend.title = element_text(size = 36),
+        title = element_text(size = 42))
 ```
 
 Row
 -----------------------
-|   Key to the importance of this data are the large differences between teacher responses to each of the prompts. As a stark example: In the USA, teachers report working an average (mean) of 28.9 hours teaching in the classroom each week. This estimate increases to 46.6 hours when teachers are asked to estimate their total number of job-related hours. This number jumps to 63.3 hours when weekly hours are calculated in the specific estimate prompt (summing reported hours from the 12-item list). *Table 1* (featured below) reports each measurement method's outcome by country, arranged from fewest to most total hours worked per week.
-
-
-Description {.sidebar}
-----------------------
 |   Weekly workload of an internationally representative sample of teachers. Each teacher was asked to report the number of hours they worked during the last week using three separate prompts: 
 * *Hours in Classroom: *How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?
 * *General Estimate: *During your most recent complete calendar week, approximately how many 60-minute hours did you spend in total on tasks related to your job at this school?  
@@ -174,5 +169,8 @@ Description {.sidebar}
   + Engaging in extracurricular activities (e.g. sports and cultural activities after school)  
   + Other work tasks  
 
----------------------
+
+Description {.sidebar}
+----------------------
+|   Key to the importance of this data are the large differences between teacher responses to each of the prompts. As a stark example: In the USA, teachers report working an average (mean) of 28.9 hours teaching in the classroom each week. This estimate increases to 46.6 hours when teachers are asked to estimate their total number of job-related hours. This number jumps to 63.3 hours when weekly hours are calculated in the specific estimate prompt (summing reported hours from the 12-item list). *Table 1* (featured below) reports each measurement method's outcome by country, arranged from fewest to most total hours worked per week.
 
