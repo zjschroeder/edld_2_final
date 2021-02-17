@@ -19,9 +19,10 @@ library(rio)
 library(cowplot)
 library(colorblindr)
 here::here()
+data <- import(here::here("data.RData"))
 ```
 
-```{r import, cache=TRUE, include = FALSE}
+```{r import, cache=TRUE, include = FALSE, eval = FALSE}
 data_full <- import(here::here("data_ignore", "TTGINTT3.sav"), setclass = "tbl_df")
 
 # Data frame selecting variables of interest
@@ -90,7 +91,7 @@ data$subject <- factor(data$subject,
                                   "Art", "PhysEd", "Religion", "Prac/Vocational Skills",
                                   "Other"))
 # At the end of any cleaning session, export the data as smaller file
-#export(data_full, "data.RData")
+#export(data, "data.RData")
 ```
 
 ```{r descriptive statistics table, include=FALSE, eval=FALSE}
@@ -107,6 +108,8 @@ descriptives <- descriptives %>%
 knitr::kable(descriptives,
              col.names = c("Country", "Classroom Hours", "General Estimate", "Specific Estimate"))
 ```
+
+
 
 # Page 1  
 
