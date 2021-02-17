@@ -2,7 +2,7 @@
 title: "Untitled"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: columns
+    orientation: rows
     vertical_layout: fill
     social: menu
     source_code: https://zjschroeder.github.io/teacher_salaries/
@@ -113,25 +113,10 @@ knitr::kable(descriptives,
 
 # Page 1  
 
-|   Weekly workload of an internationally representative sample of teachers. Each teacher was asked to report the number of hours they worked during the last week using three separate prompts: 
-* *Hours in Classroom: *How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?
-* *General Estimate: *During your most recent complete calendar week, approximately how many 60-minute hours did you spend in total on tasks related to your job at this school?  
-* *Specific Estimate: *Approximately how many 60-minute hours did you spend on the following tasks during your most recent complete calendar week, in your job at this school?  
-  + How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?  
-  + Individual planning or preparation of lessons either at school or out of school  
-  + Team work and dialogue with colleagues within this school  
-  + Marking/correcting of student work  
-  + Counseling students (including student supervision, mentoring, virtual counselling, career guidance and behaviour guidance)  
-  + Participation in school management  
-  + General administrative work (including communication, paperwork and other clerical duties)  
-  + Professional development activities  
-  + Communication and co-operation with parents or guardians  
-  + Engaging in extracurricular activities (e.g. sports and cultural activities after school)  
-  + Other work tasks  
+Row
+------------------------
 
-|   Key to the importance of this data are the large differences between teacher responses to each of the prompts. As a stark example: In the USA, teachers report working an average (mean) of 28.9 hours teaching in the classroom each week. This estimate increases to 46.6 hours when teachers are asked to estimate their total number of job-related hours. This number jumps to 63.3 hours when weekly hours are calculated in the specific estimate prompt (summing reported hours from the 12-item list). *Table 1* (featured below) reports each measurement method's outcome by country, arranged from fewest to most total hours worked per week.
-
-### Plot A
+### Figure 1
 
 ```{r}
 data %>% 
@@ -166,4 +151,28 @@ data %>%
         title = element_text(size = 14))
 ```
 
+Row
+-----------------------
+|   Key to the importance of this data are the large differences between teacher responses to each of the prompts. As a stark example: In the USA, teachers report working an average (mean) of 28.9 hours teaching in the classroom each week. This estimate increases to 46.6 hours when teachers are asked to estimate their total number of job-related hours. This number jumps to 63.3 hours when weekly hours are calculated in the specific estimate prompt (summing reported hours from the 12-item list). *Table 1* (featured below) reports each measurement method's outcome by country, arranged from fewest to most total hours worked per week.
+
+
+Description {.sidebar}
+----------------------
+|   Weekly workload of an internationally representative sample of teachers. Each teacher was asked to report the number of hours they worked during the last week using three separate prompts: 
+* *Hours in Classroom: *How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?
+* *General Estimate: *During your most recent complete calendar week, approximately how many 60-minute hours did you spend in total on tasks related to your job at this school?  
+* *Specific Estimate: *Approximately how many 60-minute hours did you spend on the following tasks during your most recent complete calendar week, in your job at this school?  
+  + How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?  
+  + Individual planning or preparation of lessons either at school or out of school  
+  + Team work and dialogue with colleagues within this school  
+  + Marking/correcting of student work  
+  + Counseling students (including student supervision, mentoring, virtual counselling, career guidance and behaviour guidance)  
+  + Participation in school management  
+  + General administrative work (including communication, paperwork and other clerical duties)  
+  + Professional development activities  
+  + Communication and co-operation with parents or guardians  
+  + Engaging in extracurricular activities (e.g. sports and cultural activities after school)  
+  + Other work tasks  
+
+---------------------
 
