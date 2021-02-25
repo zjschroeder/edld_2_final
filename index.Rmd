@@ -21,6 +21,7 @@ library(cowplot)
 library(colorblindr)
 library(gganimate)
 library(RColorBrewer)
+library(maps)
 library(sp)
 here::here()
 data <- import(here::here("data.RData"))
@@ -198,8 +199,13 @@ knitr::kable(descriptives,
 Row {.tabset .tabset-fade}
 -----------------------  
 
-### Figure
+### Satisfaction
 
+```{r}
+world_map <- map_data("world")
+```
+
+### Description
 
 
 
@@ -210,7 +216,7 @@ Row {.tabset .tabset-fade}
 
 ### Salary
 
-```{r salary}
+```{r salary, include=FALSE, eval=FALSE}
 #IMPORTING DATA, CLEANING COLUMN NAMES
 states <- import(here::here("salary.xls"))
 states <- states[,c(1,9:16)] %>% 
@@ -221,23 +227,45 @@ states[,1] <- gsub("[[:punct:]]", "", states[,1]) %>%
   factor()
 colnames(states) <- c("name", "1969", "1979", "1989", "1999", "2000", "2015", "2016", "pct_change_99_16")
 states[,2:9] <- as.numeric(unlist(states[,2:9], ' '))
+fig3data <- states[,-9]
 
 
 # Creating same column names for joining
 us <- albersusa::usa_sf()
 
-data_map <- left_join(us, states, by = "name")
+fig3data <- fig3data %>% 
+  gather(key = name, salary)
+fig3data$state <- rep(states$name, 7)
+colnames(fig3data) <- c("frame", "salary", "name")
+fig3data$frame <- factor(fig3data$frame)
 
-# Plot
-ggplot(data_map) +
-  geom_sf(aes(fill = pct_change_99_16)) +
-    scale_fill_viridis_b() +
-  labs(title = "Teacher Salary Percent Change by State",
-       fill = "Change (Percentage)") +
+data_map <- left_join(us, fig3data, by = "name")
+
+
+
+# Plot Animating
+fig3 <- ggplot(data_map) +
+  geom_sf(aes(fill = salary)) +
+     scale_fill_viridis_c(option = "C") +
   theme_void() +
-  theme(legend.position="bottom")
-  
+  labs(title = 'Teacher Salary in {closest_state}') +
+  theme(legend.position="bottom",
+        legend.key.size = unit(4, 'cm'),
+        legend.text = element_text(size = 18)) +
+  transition_states(
+    frame,
+    transition_length = 3,
+    state_length = 3) + 
+  ease_aes('cubic-in-out') +
+  enter_fade() 
+
+final_animation <- animate(fig3,100,fps = 10,duration = 20, 
+                         width = 950, height = 750, renderer = gifski_renderer())
+
+anim_save("fig3.gif", final_animation)
 ```
 
+![](fig3.gif)
+
 ### Description
-Salary changes as documented by the department of labor statistics, documenting the changes in teacher salary 
+Salary changes as documented by the department of labor statistics, documenting the changes in teacher salary between 1999 and 2016. All salary estimates were adjusted for inflation (i.e. all were put in 2016 dollars)
