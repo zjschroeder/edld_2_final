@@ -1,11 +1,12 @@
 ---
-title: "Untitled"
+title: "So, you want to be a teacher?"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: fill
     social: menu
     source_code: https://zjschroeder.github.io/teacher_salaries/
+    theme: cosmo
 editor_options: 
   chunk_output_type: console
 ---
@@ -18,6 +19,9 @@ library(knitr)
 library(rio)
 library(cowplot)
 library(colorblindr)
+library(gganimate)
+library(RColorBrewer)
+library(sp)
 here::here()
 data <- import(here::here("data.RData"))
 ```
@@ -94,7 +98,85 @@ data$subject <- factor(data$subject,
 #export(data, "data.RData")
 ```
 
-```{r descriptive statistics table, include=FALSE, eval=FALSE}
+# Hours  
+
+Row {.tabset .tabset-fade}
+-----------------------  
+```{r hours figure, include=FALSE, eval=FALSE}
+hours_data <- data %>% 
+  group_by(country) %>% 
+  summarise(.groups = 'keep',
+    mht = mean(hours_total, na.rm=T),
+    mhr = mean(hours_est, na.rm=T), 
+    mhc = mean(hours_teach, na.rm=T))
+hours_data$country <- fct_reorder(hours_data$country, hours_data$mht)
+
+#CREATING SMALLER DATAFRAME TO SPEED UP ANIMATION PROCESSING
+
+fig1data <- hours_data %>% 
+  gather(key = country, hours)
+fig1data$nation <- rep(hours_data$country, 3)
+colnames(fig1data) <- c("frame", "hours", "country")
+fig1data$frame <- factor(fig1data$frame,
+                         labels = c("Teaching Hours",
+                                    "Estimated Working Hours",
+                                    "Total Working Hours"))
+
+
+#ANIMATING
+fig1 <- fig1data %>% 
+  ggplot(aes(country, hours, fill = frame)) +
+  geom_hline(mapping = aes(yintercept = 40)) +
+  geom_bar(stat = "identity") +
+  scale_fill_OkabeIto(order = c(2, 5, 7)) +
+  coord_flip() +
+  ggthemes::theme_fivethirtyeight() +
+  transition_states(
+    frame,
+    transition_length = 3,
+    state_length = 3
+  ) + 
+  labs(title = '{closest_state}',
+       fill = NULL,
+       y = "Reported Working Hours (by week)",
+       x = "Country",
+       caption = "OECD Teaching and Learning International Survey (2018)") +
+  ease_aes('cubic-in-out') +
+  enter_grow()
+
+final_animation<-animate(fig1,100,fps = 10,duration = 20, 
+                         width = 950, height = 750, renderer = gifski_renderer())
+
+anim_save("fig1.gif", final_animation)
+```
+
+### International Teacher Hourly Workload
+
+![](fig1.gif)
+
+### Description
+|   Key to the importance of this data are the large differences between teacher responses to each of the prompts. As a stark example: In the USA, teachers report working an average (mean) of 28.9 hours teaching in the classroom each week. This estimate increases to 46.6 hours when teachers are asked to estimate their total number of job-related hours. This number jumps to 63.3 hours when weekly hours are calculated in the specific estimate prompt (summing reported hours from the 12-item list). *Table 1* (featured below) reports each measurement method's outcome by country, arranged from fewest to most total hours worked per week.
+|   Weekly workload of an internationally representative sample of teachers. Each teacher was asked to report the number of hours they worked during the last week using three separate prompts:  
+
+***Hours in Classroom: ** *How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?*  
+
+***General Estimate: ** *During your most recent complete calendar week, approximately how many 60-minute hours did you spend in total on tasks related to your job at this school?*   
+
+***Specific Estimate: ** *Approximately how many 60-minute hours did you spend on the following tasks during your most recent complete calendar week, in your job at this school?*   
+  + How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?  
+  + Individual planning or preparation of lessons either at school or out of school  
+  + Team work and dialogue with colleagues within this school  
+  + Marking/correcting of student work  
+  + Counseling students (including student supervision, mentoring, virtual counselling, career guidance and behaviour guidance)  
+  + Participation in school management  
+  + General administrative work (including communication, paperwork and other clerical duties)  
+  + Professional development activities  
+  + Communication and co-operation with parents or guardians  
+  + Engaging in extracurricular activities (e.g. sports and cultural activities after school)  
+  + Other work tasks 
+  
+### Country Data
+```{r hours table, eval=TRUE}
 descriptives <- data %>% 
   group_by(country) %>% 
   #group_by(gender, .add = T) %>% 
@@ -106,71 +188,56 @@ descriptives <- data %>%
 descriptives <- descriptives %>% 
   arrange(mean_total)
 knitr::kable(descriptives,
-             col.names = c("Country", "Classroom Hours", "General Estimate", "Specific Estimate"))
+             col.names = c("Country", "Classroom Hours", "General Estimate", "Specific Estimate"),
+             align = "l")
 ```
 
 
+# Satisfaction
 
-# Page 1  
+Row {.tabset .tabset-fade}
+-----------------------  
 
-Row
-------------------------
+### Figure
 
-### Figure 1
 
-```{r, fig.width=30, fig.height=21}
-data %>% 
-  group_by(country) %>% 
-  summarise(.groups = 'keep',
-    mht = mean(hours_total, na.rm=T),
-    mhr = mean(hours_est, na.rm=T), 
-    mhc = mean(hours_teach, na.rm=T),
-    diff = abs(mht-mhr)
-  ) %>% 
-  ggplot() +
-  geom_bar(aes(x = reorder(country, -mht), y = mht, fill = "Specific Estimate \n(Calculated by task)"),
-           stat = "identity") +
-  geom_bar(aes(x = reorder(country, -mht), y = mhr, fill = "General Estimate \n(Calculated by week)"),
-           stat = "identity") +
-  geom_bar(aes(x = reorder(country, -mht), y = mhc, fill = "Estimated Hours in \nClassroom"),
-           stat = "identity") +
-  geom_hline(mapping = aes(yintercept = 40)) +
-  geom_label(aes(x = 45, y = 50, label = "40-Hour Workweek")) +
-  scale_fill_OkabeIto(order = c(2,5,7)) +
-  labs(title = "Teacher (Under)Estimates of Weekly Working Hours",
-       subtitle = "Sampled states: Arizona, Michigan, Missouri, North Carolina, \nOregon, Pennsylvania and West Virginia", 
-       fill = "Survey Method",
-       y = "Reported Working Hours (by week)",
-       x = "Country",
-       caption = "OECD Teaching and Learning International Survey (2018)") +
-  coord_flip() +
-  ggthemes::theme_fivethirtyeight() +
-  theme(text = element_text(size=30),
-        legend.text=element_text(size=36),
-        legend.title = element_text(size = 36),
-        title = element_text(size = 42))
+
+
+# Salary
+
+Row {.tabset .tabset-fade}
+-----------------------  
+
+### Salary
+
+```{r salary}
+#IMPORTING DATA, CLEANING COLUMN NAMES
+states <- import(here::here("salary.xls"))
+states <- states[,c(1,9:16)] %>% 
+  na.omit()
+states <- states[-1,]
+states[,1] <- gsub("[[:punct:]]", "", states[,1]) %>% 
+  trimws(which = "right") %>% 
+  factor()
+colnames(states) <- c("name", "1969", "1979", "1989", "1999", "2000", "2015", "2016", "pct_change_99_16")
+states[,2:9] <- as.numeric(unlist(states[,2:9], ' '))
+
+
+# Creating same column names for joining
+us <- albersusa::usa_sf()
+
+data_map <- left_join(us, states, by = "name")
+
+# Plot
+ggplot(data_map) +
+  geom_sf(aes(fill = pct_change_99_16)) +
+    scale_fill_viridis_b() +
+  labs(title = "Teacher Salary Percent Change by State",
+       fill = "Change (Percentage)") +
+  theme_void() +
+  theme(legend.position="bottom")
+  
 ```
 
-Row
------------------------
-|   Weekly workload of an internationally representative sample of teachers. Each teacher was asked to report the number of hours they worked during the last week using three separate prompts: 
-* *Hours in Classroom: *How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?
-* *General Estimate: *During your most recent complete calendar week, approximately how many 60-minute hours did you spend in total on tasks related to your job at this school?  
-* *Specific Estimate: *Approximately how many 60-minute hours did you spend on the following tasks during your most recent complete calendar week, in your job at this school?  
-  + How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?  
-  + Individual planning or preparation of lessons either at school or out of school  
-  + Team work and dialogue with colleagues within this school  
-  + Marking/correcting of student work  
-  + Counseling students (including student supervision, mentoring, virtual counselling, career guidance and behaviour guidance)  
-  + Participation in school management  
-  + General administrative work (including communication, paperwork and other clerical duties)  
-  + Professional development activities  
-  + Communication and co-operation with parents or guardians  
-  + Engaging in extracurricular activities (e.g. sports and cultural activities after school)  
-  + Other work tasks  
-
-
-Description {.sidebar}
-----------------------
-|   Key to the importance of this data are the large differences between teacher responses to each of the prompts. As a stark example: In the USA, teachers report working an average (mean) of 28.9 hours teaching in the classroom each week. This estimate increases to 46.6 hours when teachers are asked to estimate their total number of job-related hours. This number jumps to 63.3 hours when weekly hours are calculated in the specific estimate prompt (summing reported hours from the 12-item list). *Table 1* (featured below) reports each measurement method's outcome by country, arranged from fewest to most total hours worked per week.
-
+### Description
+Salary changes as documented by the department of labor statistics, documenting the changes in teacher salary 
