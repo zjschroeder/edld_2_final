@@ -202,22 +202,39 @@ Row {.tabset .tabset-fade}
 ### Satisfaction
 
 ```{r}
-world_map <- map_data("world")
-world_map$country <- world_map$region
 fig2data <- data %>% 
   group_by(country) %>% 
   summarise(.groups = "keep",
-            rag = mean(g_regret, na.rm = T))
-data_map <- left_join(fig2data, world_map, by = "country")
+            rag = mean(g_regret, na.rm = T),
+            salary = mean(salary, na.rm = T))
+# THIS WAS A FAILED ATTEMPT AT CREATING A GIF, I MAY DO IT AGAIN, TBD
 
-fig2 <- ggplot(data_map, aes(long, lat, group = group)) +
-  geom_polygon(aes(fill = rag ), color = "white") +
-  scale_fill_viridis_c(option = "C")
+#names <- fig2data$country
+#fig2data <- fig2data %>% 
+#  gather(key = country, score)
+#fig2data$name <- rep(names, 2)
+#colnames(fig2data) <- c("frame", "score", "country")
+#fig2data$frame <- factor(fig2data$frame,
+#                         labels = c("Regret Becomming Teacher", "Satisfied With Salery"))
+#
+world <- map_data("world")
+world$country <- factor(world$region)
+fig2data <- full_join(world, fig2data, by = "country")
+
+fig2data %>% 
+  ggplot(aes(x = long, y = lat, group = group, fill=rag)) +
+  geom_polygon(colour = "white") +
+  scale_fill_viridis_c(option = "plasma") +
+  theme_void() +
+  labs(title = "How much do teachers regret becoming teachers?",
+       fill = "Regret") +
+  theme(legend.position="bottom")
 
 ```
 
 ### Description
-
+How much do teachers regret becoming teachers?
+Higher scores reflect more regret.
 
 
 # Salary
