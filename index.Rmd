@@ -203,6 +203,17 @@ Row {.tabset .tabset-fade}
 
 ```{r}
 world_map <- map_data("world")
+world_map$country <- world_map$region
+fig2data <- data %>% 
+  group_by(country) %>% 
+  summarise(.groups = "keep",
+            rag = mean(g_regret, na.rm = T))
+data_map <- left_join(fig2data, world_map, by = "country")
+
+fig2 <- ggplot(data_map, aes(long, lat, group = group)) +
+  geom_polygon(aes(fill = rag ), color = "white") +
+  scale_fill_viridis_c(option = "C")
+
 ```
 
 ### Description
