@@ -149,6 +149,8 @@ final_animation<-animate(fig1,100,fps = 10,duration = 20,
                          width = 950, height = 750, renderer = gifski_renderer())
 
 anim_save("fig1.gif", final_animation)
+
+#Possible Suggestion/Comments: In the description section, the variables you mention are Hours in Classroom, General Estimate, and Specific Estimate. It might be more clear if these match up with the variables you're using in your visualization as well (Teaching hours, Estimated Working Hours, Total Working Hours). Definitely not needed though!  I really like that you added the solid line to show the 40hrs/week. It might be helpful to make the x-axis scale have 10 hr intervals instead of 20.
 ```
 
 ### International Teacher Hourly Workload
