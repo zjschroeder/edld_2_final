@@ -26,7 +26,7 @@ library(sp)
 here::here()
 data <- import(here::here("data.RData"))
 ```
-
+Zach, this is beautiful! You started out with such a large data set and many variables, but efficiently organized it and created the variables of interest. I appreciate the headings and steps you listed throughout the rmd file as well. I really haven't looked much into how to create gifs in R or ever tried to do it on my own, so seeing how you executed that in so many different types of plots is really helpful. Hopefully I'll try it out soon. 
 ```{r import, cache=TRUE, include = FALSE, eval = FALSE}
 data_full <- import(here::here("data_ignore", "TTGINTT3.sav"), setclass = "tbl_df")
 
@@ -131,7 +131,7 @@ fig1 <- fig1data %>%
   geom_bar(stat = "identity") +
   scale_fill_OkabeIto(order = c(2, 5, 7)) +
   coord_flip() +
-  ggthemes::theme_fivethirtyeight() +
+  ggthemes::theme_fivethirtyeight() + 
   transition_states(
     frame,
     transition_length = 3,
@@ -204,11 +204,11 @@ Row {.tabset .tabset-fade}
 ```{r}
 fig2data <- data %>% 
   group_by(country) %>% 
-  summarise(.groups = "keep",
+  summarise(.groups = "keep", #oh, I wasn't familiar with the .groups argument. This is good to know!
             rag = mean(g_regret, na.rm = T),
             salary = mean(salary, na.rm = T))
 # THIS WAS A FAILED ATTEMPT AT CREATING A GIF, I MAY DO IT AGAIN, TBD
-
+    ##I support you and your decisions 
 #names <- fig2data$country
 #fig2data <- fig2data %>% 
 #  gather(key = country, score)
@@ -230,6 +230,8 @@ fig2data %>%
        fill = "Regret") +
   theme(legend.position="bottom")
 
+#Strengths: this is such an easy way to visualize the level of regret across certain countries. This is definitely a variable I hadn't thought much about. (It would be interesting to see how the level of regret and salary correlate.)
+#Possible suggestion: would it be possible to switch the color spectrum so that yellow is less regret and the dark purple is more regret? I feel like a darker red and purple-y color feels more ominous and negative, which would match up with the vibes of intense regret. 
 ```
 
 ### Description
@@ -279,7 +281,8 @@ fig3 <- ggplot(data_map) +
   labs(title = 'Teacher Salary in {closest_state}') +
   theme(legend.position="bottom",
         legend.key.size = unit(4, 'cm'),
-        legend.text = element_text(size = 18)) +
+        legend.text = element_text(size = 18))+
+ # scales::label_dollar()) +
   transition_states(
     frame,
     transition_length = 3,
@@ -291,6 +294,8 @@ final_animation <- animate(fig3,100,fps = 10,duration = 20,
                          width = 950, height = 750, renderer = gifski_renderer())
 
 anim_save("fig3.gif", final_animation)
+#Strengths: great use of animations here to show the changes over time across states. I think this is more effective than having a separate plot for each year.I
+#Possible suggestions: It could be helpful to add $ signs. I tried messing around with this function but didnt have any luck # scales::label_dollar())
 ```
 
 ![](fig3.gif)
