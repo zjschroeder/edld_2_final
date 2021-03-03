@@ -1,5 +1,6 @@
 ---
 title: "So, you want to be a teacher?"
+#J: Love the title.
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -97,6 +98,8 @@ data$subject <- factor(data$subject,
                                   "Other"))
 # At the end of any cleaning session, export the data as smaller file
 #export(data, "data.RData")
+
+#J: I've never thought of doing this and it makes so much sense! Will be implementing that into my own work.
 ```
 
 # Hours  
@@ -149,6 +152,14 @@ final_animation<-animate(fig1,100,fps = 10,duration = 20,
                          width = 950, height = 750, renderer = gifski_renderer())
 
 anim_save("fig1.gif", final_animation)
+
+#J Comments:
+# - The line at 40 hours is a really nice touch.
+# - Colors and theming in general are really nice and I appreciate your description and the table. Context is very clear.
+
+# - One really minimal aesthetic thing:
+# - Consider removing the space on the y-axis between country names and bars using scale_x_continuous(expand = c(0, 0)) 
+# (I believe it'll be x rather than y as you used coord_flip())
 ```
 
 ### International Teacher Hourly Workload
@@ -230,6 +241,13 @@ fig2data %>%
        fill = "Regret") +
   theme(legend.position="bottom")
 
+#J Comments:
+# - I like the use of the plasma scale.
+# - I also like the use of a map to present this information. It's really interesting to see how this differs globally.
+
+# Minor aesthetic things:
+# - If the actual score (1.4-1.8) is not essential for the audience, consider changing the legend to "Low Regret - High Regret" e.g.
+# - Are the gray areas missing data? An annotation explaining that would be nice!
 ```
 
 ### Description
@@ -291,6 +309,13 @@ final_animation <- animate(fig3,100,fps = 10,duration = 20,
                          width = 950, height = 750, renderer = gifski_renderer())
 
 anim_save("fig3.gif", final_animation)
+
+#J Comments:
+# - I like the use of animation for this plot, and the timing of transitions specifically works really well.
+# - I'm a little confused by the legend--it says "Change (Percentage)" but then seems to show annual salary? That might need a relabel and some commas/dollar signs.
+# - Really nice that the salary values were adjusted for inflation.
+
+# Great job!
 ```
 
 ![](fig3.gif)
