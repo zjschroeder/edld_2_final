@@ -2,7 +2,7 @@
 title: "So, you want to be a teacher?"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: rows
+    orientation: columns
     vertical_layout: fill
     social: menu
     source_code: https://zjschroeder.github.io/teacher_salaries/
@@ -27,7 +27,9 @@ here::here()
 data <- import(here::here("data.RData"))
 ```
 
-```{r import, cache=TRUE, include = FALSE, eval = FALSE}
+```{r Data Wrangling, cache=TRUE, include = FALSE, eval = FALSE}
+#The data wrangling is listed here in full, however, the code is not set to run this - instead, a #simplified dataframe is exported to a .RData object and included in the repo, as the original data #file is too large to be shared via github.
+
 data_full <- import(here::here("data_ignore", "TTGINTT3.sav"), setclass = "tbl_df")
 
 # Data frame selecting variables of interest
@@ -99,11 +101,11 @@ data$subject <- factor(data$subject,
 #export(data, "data.RData")
 ```
 
-# Hours  
+# Teacher Working Hours 
 
-Row {.tabset .tabset-fade}
------------------------  
 ```{r hours figure, include=FALSE, eval=FALSE}
+#The data manipulation outlined below is the initial data cleaning procedure. However, due to the #sizeable run-time for creating a GIF, I chose to export a gif into the repo, instead of creating a #new gif every time I load it.
+
 hours_data <- data %>% 
   group_by(country) %>% 
   summarise(.groups = 'keep',
@@ -147,37 +149,23 @@ fig1 <- fig1data %>%
 
 final_animation<-animate(fig1,100,fps = 10,duration = 20, 
                          width = 950, height = 750, renderer = gifski_renderer())
-
+#SAVING GIF
 anim_save("fig1.gif", final_animation)
 ```
+  
+  
+Column {data-width=700}
+-------------------------------------
 
 ### International Teacher Hourly Workload
 
-![](fig1.gif)
+![](fig1.gif)    
 
-### Description
-|   Key to the importance of this data are the large differences between teacher responses to each of the prompts. As a stark example: In the USA, teachers report working an average (mean) of 28.9 hours teaching in the classroom each week. This estimate increases to 46.6 hours when teachers are asked to estimate their total number of job-related hours. This number jumps to 63.3 hours when weekly hours are calculated in the specific estimate prompt (summing reported hours from the 12-item list). *Table 1* (featured below) reports each measurement method's outcome by country, arranged from fewest to most total hours worked per week.
-|   Weekly workload of an internationally representative sample of teachers. Each teacher was asked to report the number of hours they worked during the last week using three separate prompts:  
+Column {.tabset data-width=400 data-height=700}
+-----------------------------------------------------------------------
+### Country-Level Data
 
-***Hours in Classroom: ** *How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?*  
-
-***General Estimate: ** *During your most recent complete calendar week, approximately how many 60-minute hours did you spend in total on tasks related to your job at this school?*   
-
-***Specific Estimate: ** *Approximately how many 60-minute hours did you spend on the following tasks during your most recent complete calendar week, in your job at this school?*   
-  + How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?  
-  + Individual planning or preparation of lessons either at school or out of school  
-  + Team work and dialogue with colleagues within this school  
-  + Marking/correcting of student work  
-  + Counseling students (including student supervision, mentoring, virtual counselling, career guidance and behaviour guidance)  
-  + Participation in school management  
-  + General administrative work (including communication, paperwork and other clerical duties)  
-  + Professional development activities  
-  + Communication and co-operation with parents or guardians  
-  + Engaging in extracurricular activities (e.g. sports and cultural activities after school)  
-  + Other work tasks 
-  
-### Country Data
-```{r hours table, eval=TRUE}
+```{r Country-Level Data}
 descriptives <- data %>% 
   group_by(country) %>% 
   #group_by(gender, .add = T) %>% 
@@ -186,20 +174,74 @@ descriptives <- data %>%
     mean_general = round(mean(hours_est, na.rm = T), 2),
     mean_total = round(mean(hours_total, na.rm = T), 2)
   )
-descriptives <- descriptives %>% 
-  arrange(mean_total)
-knitr::kable(descriptives,
-             col.names = c("Country", "Classroom Hours", "General Estimate", "Specific Estimate"),
-             align = "l")
+
+DT::datatable(descriptives, 
+              colnames = c("Country", "Teaching Hours", 
+                            "Estimated Working Hours", "Total Working Hours"),
+              rownames = FALSE,
+              filter = "none",
+              options = list(scrollX = TRUE,
+                             pageLength = 25,
+                             searching = FALSE,
+                             columnDefs = list(list(className = "dt-center",
+                                                    targets = "_all")
+                                               )))
+              
 ```
 
+### Version 1
 
-# Satisfaction
+```{r}
+hours_data <- data %>% 
+  group_by(country) %>% 
+  summarise(.groups = 'keep',
+    mht = mean(hours_total, na.rm=T),
+    mhr = mean(hours_est, na.rm=T), 
+    mhc = mean(hours_teach, na.rm=T))
+hours_data$country <- fct_reorder(hours_data$country, hours_data$mht)
+hours_data %>% 
+  ggplot(aes(x = country, y = mht)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  ggthemes::theme_fivethirtyeight()
+```
+
+This is the first version of the figure, it lacks color and nuance so isn't useful for telling the story. 
+
+
+### Version 2
+
+```{r}
+hours_data %>% 
+  ggplot() +
+  geom_bar(aes(x = country, y = mht), stat = "identity", fill = "RED") +
+  geom_bar(aes(x = country, y = mhr), stat = "identity", fill = "BLUE") +
+  geom_bar(aes(x = country, y = mhc), stat = "identity", fill = "GREEN") +
+  coord_flip() +
+  ggthemes::theme_fivethirtyeight()
+```
+
+Adding color definitely helped clarify the differences between each of these measures of teacher workload, but it isn't colorblind friendly, nor is it as nice as it can be.
+
+Sidebar {.sidebar}
+-----------------------------------------------------------------------
+|   Key to the importance of these data are the large differences between teacher responses to each of the prompts. As a stark example: In the USA, teachers report working an average (mean) of 28.9 hours teaching in the classroom each week. This estimate increases to 46.6 hours when teachers are asked to estimate their total number of job-related hours. This number jumps to 63.3 hours when weekly hours are calculated in the specific estimate prompt (summing reported hours from the 12-item list). *Country Data* (featured in the table above above) reports each measurement method's outcome by country, arranged from fewest to most total hours worked per week.  
+    
+|   Weekly workload of an internationally representative sample of teachers. Each teacher was asked to report the number of hours they worked during the last week using three separate prompts:  
+  
+  
+**Teaching Hours: ** *How many 60-minute hours did you spend on teaching at this school during your most recent complete calendar week?*  
+  
+**Estimated Working Hours ** *During your most recent complete calendar week, approximately how many 60-minute hours did you spend in total on tasks related to your job at this school?*
+  
+**Total Working Hours ** *Approximately how many 60-minute hours did you spend on the following 11 tasks during your most recent complete calendar week, in your job at this school?* 
+
+# Regret Becoming a Teacher
 
 Row {.tabset .tabset-fade}
 -----------------------  
 
-### Satisfaction
+### Final Version
 
 ```{r}
 fig2data <- data %>% 
@@ -207,16 +249,7 @@ fig2data <- data %>%
   summarise(.groups = "keep",
             rag = mean(g_regret, na.rm = T),
             salary = mean(salary, na.rm = T))
-# THIS WAS A FAILED ATTEMPT AT CREATING A GIF, I MAY DO IT AGAIN, TBD
 
-#names <- fig2data$country
-#fig2data <- fig2data %>% 
-#  gather(key = country, score)
-#fig2data$name <- rep(names, 2)
-#colnames(fig2data) <- c("frame", "score", "country")
-#fig2data$frame <- factor(fig2data$frame,
-#                         labels = c("Regret Becomming Teacher", "Satisfied With Salery"))
-#
 world <- map_data("world")
 world$country <- factor(world$region)
 fig2data <- full_join(world, fig2data, by = "country")
@@ -232,12 +265,44 @@ fig2data %>%
 
 ```
 
-### Description
-How much do teachers regret becoming teachers?
-Higher scores reflect more regret.
+> This figure describes the amount of regret teachers feel about choosing to pursue teaching as their primary career. Interestingly, the data are truncated such that the majority of our values fall between 1.4 and 1.8. It is important to note this, as the scale was a 1-5 scale, so while there appears to be diversity in the globe, it actually is due to a limited range in our data. I added the viridis plasma continuous fill to offer increased contrast in the color.
+
+### Version 1
+
+```{r}
+fig2dat <- fig2data %>% 
+  na.omit(.) %>% 
+  group_by(country) %>% 
+  summarise(.groups = 'keep',
+            mean = mean(rag, na.rm = T))
+  
+ggplot(fig2dat) +
+  geom_col(mapping = aes(x = country, y = mean)) +
+  coord_flip()
+```
 
 
-# Salary
+> The first version of this figure worked well in that it mapped the correct data on the correct country, but was unsuccessful in being particularly enjoyable to read, or having any useful inferences.
+
+
+### Version 2
+
+```{r}
+fig2data %>% 
+  ggplot(aes(x = long, y = lat, group = group, fill=rag)) +
+  geom_polygon(colour = "white") +
+  theme_void() +
+  labs(title = "How much do teachers regret becoming teachers?",
+       fill = "Regret") +
+  theme(legend.position="bottom")
+
+```
+
+
+> In version two, I made several key adjustments to the plot, adding color and applying to a map friendly and moving th legend to the bottom of the figure to maximize space.
+
+
+# Salary Change Over Time
 
 Row {.tabset .tabset-fade}
 -----------------------  
@@ -276,7 +341,8 @@ fig3 <- ggplot(data_map) +
   geom_sf(aes(fill = salary)) +
      scale_fill_viridis_c(option = "C") +
   theme_void() +
-  labs(title = 'Teacher Salary in {closest_state}') +
+  labs(title = 'Teacher Salary in {closest_state}',
+       fill = "Salary") +
   theme(legend.position="bottom",
         legend.key.size = unit(4, 'cm'),
         legend.text = element_text(size = 18)) +
@@ -295,5 +361,52 @@ anim_save("fig3.gif", final_animation)
 
 ![](fig3.gif)
 
-### Description
-Salary changes as documented by the department of labor statistics, documenting the changes in teacher salary between 1999 and 2016. All salary estimates were adjusted for inflation (i.e. all were put in 2016 dollars)
+> Salary changes as documented by the department of labor statistics, documenting the changes in teacher salary between 1999 and 2016. All salary estimates were adjusted for inflation (i.e. all were put in 2016 dollars). One limitation of this visualization as it currently stands is that it lacks nuance for cost of living.
+
+### Version 1
+
+```{r}
+states <- import(here::here("salary.xls"))
+states <- states[,c(1,9:16)] %>% 
+  na.omit()
+states <- states[-1,]
+states[,1] <- gsub("[[:punct:]]", "", states[,1]) %>% 
+  trimws(which = "right") %>% 
+  factor()
+colnames(states) <- c("name", "1969", "1979", "1989", "1999", "2000", "2015", "2016", "pct_change_99_16")
+states[,2:9] <- as.numeric(unlist(states[,2:9], ' '))
+fig3data <- states[,-9]
+
+# Creating same column names for joining
+us <- albersusa::usa_sf()
+
+fig3data <- fig3data %>% 
+  gather(key = name, salary)
+fig3data$state <- rep(states$name, 7)
+colnames(fig3data) <- c("frame", "salary", "name")
+fig3data$frame <- factor(fig3data$frame)
+
+data_map <- left_join(us, fig3data, by = "name")
+
+# PlOTTING DATA
+
+ggplot(fig3data) +
+  geom_col(aes(x = name, y = salary)) +
+  coord_flip() +
+  facet_wrap(~frame)
+```
+
+
+> This visual is a MESS! It's nearly totally unreadable and unuseful and gives no useful information. Major revisions necessary. I don't even recall how I made this plot originally, but for the final assignment I reverse engineered it to show the starting place.
+
+
+### Version 2 
+
+```{r}
+fig3data$year <- as.numeric(as.character(fig3data$frame))
+
+ggplot(fig3data) +
+  geom_line(aes(x = year, y = salary, color = name))
+```
+
+> This is another really rough version of the plot. I like that it's showing change over time, but the color breakdown is totally unusable! 
